@@ -77,6 +77,39 @@ Node requirement: `>=22.14.0 <23.0.0`
 
 ---
 
+## Screenshots
+
+### Navigation Features
+
+**Desktop Navigation with Mega-Menu**
+![Navigation Items](./assets/NavItems.png)
+
+**Mobile Navigation Drawer**
+![Mobile Navigation](./assets/MobileNav.png)
+![Mobile Navigation 2](./assets/MobileNav2.png)
+
+**Fullscreen Panel**
+![Fullscreen Panel](./assets/FullscreenPanel.png)
+
+### Admin Settings Panel
+
+**Admin Panel - Overview & Configuration**
+![Admin Panel 1](./assets/AdminPanel1.png)
+![Admin Panel 2](./assets/AdminPanel2.png)
+![Admin Panel 3](./assets/AdminPanel3.png)
+
+**Admin Panel - Styling & Colors**
+![Admin Panel 4](./assets/AdminPanel4.png)
+![Admin Panel 5](./assets/AdminPanel5.png)
+![Admin Panel 6](./assets/AdminPanel6.png)
+
+### User Experience
+
+**Settings Panel - User Profile**
+![Settings Panel User](./assets/SettingsPanelUser.png)
+
+---
+
 ## Overview
 
 The solution mounts directly into SharePoint's placeholders to provide:
