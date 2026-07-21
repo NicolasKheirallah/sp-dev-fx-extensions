@@ -29,7 +29,7 @@ This sample is optimally compatible with the following environment configuration
 
 ## Contributors
 
-- Nicolas Kheirallah
+- [Nicolas Kheirallah](https://github.com/NicolasKheirallah)
 
 ## Version history
 
@@ -45,6 +45,7 @@ This sample is optimally compatible with the following environment configuration
 3. Run `npm install` to restore dependencies.
 4. Run `npm run build` to compile and package the solution.
 5. Configure your local debugging parameters in `config/serve.json`, then run:
+
    ```bash
    npm run start
    ```
@@ -113,27 +114,32 @@ Node requirement: `>=22.14.0 <23.0.0`
 ## Overview
 
 The solution mounts directly into SharePoint's placeholders to provide:
-*   A responsive header bar that condenses automatically on scroll.
-*   A desktop mega-menu supporting column groupings, featured items, and custom overview cards.
-*   A mobile navigation panel (lazy-loaded to keep the main bundle light) with drill-down navigation.
-*   An admin settings panel with a visual editor for navigation structures, color schemes, and feature flags.
-*   An optional HTML footer that inherits the portal's theme variables.
+
+- A responsive header bar that condenses automatically on scroll.
+- A desktop mega-menu supporting column groupings, featured items, and custom overview cards.
+- A mobile navigation panel (lazy-loaded to keep the main bundle light) with drill-down navigation.
+- An admin settings panel with a visual editor for navigation structures, color schemes, and feature flags.
+- An optional HTML footer that inherits the portal's theme variables.
 
 ---
 
 ## How it Works (Runtime Behavior)
 
 ### 1. Fast Initial Render
+
 To avoid layout shifts or blank areas during page load, the header checks for a cached snapshot of the navigation structure. If a cached version (5-minute TTL) is not available, it displays a fallback layout immediately while fetching the fresh structure asynchronously.
 
 ### 2. Managed Navigation & Lazy Loading
+
 The Term Store navigation provider queries the SharePoint Term Store. Deeper sub-menus are hydrated lazily on demand when a user opens them, keeping initial payload sizes minimal.
 
 ### 3. Dynamic Configuration Updates
+
 Configurations are resolved from three cascading sources (highest priority wins):
-1.  A `settings.json` file uploaded to the site collection's document library.
-2.  Deploy-time component properties (`ClientSideComponentProperties`).
-3.  Built-in code defaults.
+
+1. A `settings.json` file uploaded to the site collection's document library.
+2. Deploy-time component properties (`ClientSideComponentProperties`).
+3. Built-in code defaults.
 
 This allows administrators to modify links, disable features, or change colors on the fly using the in-header editor without having to repackage or redeploy the `.sppkg` file.
 
@@ -142,15 +148,19 @@ This allows administrators to modify links, disable features, or change colors o
 ## Key Technical Decisions
 
 ### 1. The Suite Bar Probe
+
 SharePoint Online does not expose the suite bar's current background color through the standard `ThemeProvider` API. To ensure the header blends in with the top Microsoft 365 bar, the engine probes the live DOM at runtime to read the computed background style. A debounced `MutationObserver` watches for slow-loading suite bar elements on initial load and schedules a paint as soon as it appears.
 
 ### 2. Performance & Thread Optimization
+
 To prevent UI lag during page scrolls and window resizing:
-*   Sub-components are wrapped in `React.memo()` to prevent unnecessary re-renders.
-*   Context values destructured from raw properties are memoized to keep reference identities stable.
-*   Resize calculations are throttled using animation frames.
+
+- Sub-components are wrapped in `React.memo()` to prevent unnecessary re-renders.
+- Context values destructured from raw properties are memoized to keep reference identities stable.
+- Resize calculations are throttled using animation frames.
 
 ### 3. React 18 Async Unmounting
+
 SPFx customizers can be mounted and unmounted dynamically during client-side navigation. Since React 18's `root.unmount()` is asynchronous, host DOM elements are removed inside a microtask block to prevent detached nodes, memory leaks, and warning messages in the browser console.
 
 ---
@@ -174,12 +184,14 @@ The Application Customizer accepts the following properties via `ClientSideCompo
 | `features.searchEnabled` | Enables the search tool callout in the header. | `true` |
 
 ### Color Overrides
+
 Admins can define a custom `colors` object in the properties. Any specified key will override the corresponding theme-derived value:
-*   `chromeBackground`: Main header background color.
-*   `chromeText`: Text and icon color on the header bar.
-*   `accent`: Active underlines, border highlights, and brand markers.
-*   `surface`: Dropdown panels and slide-out panel backgrounds.
-*   `border`: Divider lines.
+
+- `chromeBackground`: Main header background color.
+- `chromeText`: Text and icon color on the header bar.
+- `accent`: Active underlines, border highlights, and brand markers.
+- `surface`: Dropdown panels and slide-out panel backgrounds.
+- `border`: Divider lines.
 
 ---
 
@@ -188,10 +200,12 @@ Admins can define a custom `colors` object in the properties. Any specified key 
 We provide a PnP PowerShell script to provision a term store set with all the custom properties required by the extension.
 
 ### Files
-*   `scripts/navigation.json`: Defines the navigation hierarchy, SEO meta-tags, and custom layouts.
-*   `scripts/Provision-Navigation.ps1`: Creates or updates the term set in your SharePoint Term Store.
+
+- `scripts/navigation.json`: Defines the navigation hierarchy, SEO meta-tags, and custom layouts.
+- `scripts/Provision-Navigation.ps1`: Creates or updates the term set in your SharePoint Term Store.
 
 ### Usage
+
 ```powershell
 # Authenticate and run a dry-run test
 .\scripts\Provision-Navigation.ps1 -SiteUrl "https://contoso.sharepoint.com" -ClientId "YOUR_CLIENT_ID" -DryRun
@@ -205,12 +219,16 @@ We provide a PnP PowerShell script to provision a term store set with all the cu
 ## Accessibility & Security
 
 ### Accessibility (WCAG 2.2 AA)
-*   **Disclosure Menus**: Top-level menu triggers use modern disclosure button patterns instead of nested menus. This keeps the tab order simple and matches screen-reader keyboard patterns.
-*   **High Contrast**: Includes media overrides for `forced-colors: active` to match standard OS high-contrast themes.
-*   **Reduced Motion**: Respects browser preferences (`prefers-reduced-motion: reduce`) by disabling logo parallax effects and menu transitions.
-*   **Semantic Landmarks**: Uses standard HTML5 landmarks (`<nav>`, `<section>`, `<aside>`) with explicit labels.
+
+- **Disclosure Menus**: Top-level menu triggers use modern disclosure button patterns instead of nested menus. This keeps the tab order simple and matches screen-reader keyboard patterns.
+- **High Contrast**: Includes media overrides for `forced-colors: active` to match standard OS high-contrast themes.
+- **Reduced Motion**: Respects browser preferences (`prefers-reduced-motion: reduce`) by disabling logo parallax effects and menu transitions.
+- **Semantic Landmarks**: Uses standard HTML5 landmarks (`<nav>`, `<section>`, `<aside>`) with explicit labels.
 
 ### Security
-*   **URL Whitelisting**: All navigation links are validated against an allowed protocol list (`http:`, `https:`, `mailto:`). Unsafe links (such as `javascript:` execution strings) are discarded.
-*   **PII Protection**: Telemetry payloads send item IDs and link labels only; no user details or page context values are collected.
-*   **HTML Sanitization**: Custom footer templates are sanitized using `DOMPurify` to prevent cross-site scripting (XSS) vectors.
+
+- **URL Whitelisting**: All navigation links are validated against an allowed protocol list (`http:`, `https:`, `mailto:`). Unsafe links (such as `javascript:` execution strings) are discarded.
+- **PII Protection**: Telemetry payloads send item IDs and link labels only; no user details or page context values are collected.
+- **HTML Sanitization**: Custom footer templates are sanitized using `DOMPurify` to prevent cross-site scripting (XSS) vectors.
+
+<img src="https://m365-visitor-stats.azurewebsites.net/sp-dev-fx-extensions/samples/react-application-navigation-header" />
